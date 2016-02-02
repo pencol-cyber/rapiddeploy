@@ -11,10 +11,13 @@ echo   rrr         dddd ddd                                                   ##
 echo   rrr          ddddddd                                                   ##\
 echo   rrr
 timeout 8
+	rem
+	rem TODO: Add Server 2003/2008/2012 patch lists
+	rem TODO: Add alternate URL decision tree
+	rem
 set NEEDS_REBOOT=0
 set RD_Agent=wget.exe
 set RD_AgentString="'RapidDeploy tool for fetching crtitical MS patches at PRCCDC 2016 bofh@pencol.edu'"
-set SYSTEM_WGETRC=
 cls
 color 07
 echo ###########################################################################
@@ -24,6 +27,7 @@ echo .
 echo Examples:
 echo "rapidpatch.cmd "microsoft"      -- download from windows update "
 echo "rapidpatch.cmd <URL>            -- download from local mirror at <URL> "
+echo .
 	echo ..... Initiating Sytem Fingerprint
 	systeminfo | find /I "OS Name" > tmp.os
 	systeminfo | find /I "System Type" > tmp.arch
@@ -56,14 +60,13 @@ set Patch_Description_MS14-025="MS14-025: Security Update to address Pass The Ha
 set Patch_Description_MS14-068="MS14-068: Flaws in Kerberos Authentication could lead to complete Domain pwnage aka. MimiKatz"
 set Patch_Description_MS15-034="MS15-034: Remote code execution in HTTP.sys driver"
 set Patch_Description_MS15-067="MS15-067: Remote Code Execution in Windows Remote Desktop Protocol"
+set Patch_Description_MS15-127="MS15-127: Remote Code Execution in Active Directory DNS Service"
+set Patch_Description_MS15-128="MS15-128: Remote Code Execution in .NET Framework"
 set webroot=https://github.com/pencol-cyber/patches/raw/master
 
 timeout 6
 rem echo %OSNAME%
 goto %OSNAME%
-
-:quit
-exit
 
 :Windows10
 	echo Assembling Patch list for %OSNAME%
@@ -76,16 +79,18 @@ goto Win10_%OSARCH%
 goto Win10_All
 
 :Win10_x32-based
-	echo No such agency, amigo
+	echo reached sub arch          %OSARCH% 
+	set branch=Win10/x32
+	set patchdir=Win10_x32
+
 goto EOF
 
 :Win10_All
-	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
-	echo %Patch_Description_MS15-067%
-	call :push_new MS15-067 %MS15-067_URL%
-goto skel
+	echo Locked out by M$, sorry friend
+	echo Nothing I can do for Windows 10
+goto EOF
 
 :Windows8
 	echo Assembling Patch list for %OSNAME%
@@ -106,12 +111,15 @@ goto Win8_All
 :Win8_All
 	set MS15-034_URL=%webroot%/%branch%/MS15-034.msu
 	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo %Patch_Description_MS15-034%
 	call :push_new MS15-034 %MS15-034_URL%
 	echo %Patch_Description_MS15-067%
 	call :push_new MS15-067 %MS15-067_URL%
+	echo %Patch_Description_MS15-128%
+	call :push_new MS15-128 %MS15-128_URL%
 goto skel
 
 :Windows7
@@ -138,6 +146,7 @@ goto Win7_All
 	set MS12-020b_URL=%webroot%/%branch%/MS12-020-v2.msu
 	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
 	set MS15-067b_URL=%webroot%/%branch%/MS15-067-v2.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo %Patch_Description_MS10-054%
@@ -152,6 +161,10 @@ goto Win7_All
 	call :push_new MS12-020-v2 %MS12-020b_URL%
 	echo %Patch_Description_MS15-067%
 	call :push_new MS15-067 %MS15-067_URL%
+	echo %Patch_Description_MS15-067% II
+	call :push_new MS15-067-v2 %MS15-067b_URL%
+	echo %Patch_Description_MS15-128%
+	call :push_new MS15-128 %MS15-128_URL%
 goto skel
 
 :WindowsVista
@@ -171,18 +184,22 @@ goto WinVista_All
 goto WinVista_All
 
 :WinVista_All
-	set MS08-067_URL=%webroot%/%branch%/MS08-067.exe
-	set MS09-001_URL=%webroot%/%branch%/MS09-001.exe
-	set MS10-054_URL=%webroot%/%branch%/MS10-054.exe
-	set MS10-061_URL=%webroot%/%branch%/MS10-061.exe
-	set MS12-005_URL=%webroot%/%branch%/MS12-005.exe
-	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
+	set MS08-067_URL=%webroot%/%branch%/MS08-067.msu
+	set MS09-001_URL=%webroot%/%branch%/MS09-001.msu
+	set MS09-050_URL=%webroot%/%branch%/MS09-050.msu
+	set MS10-054_URL=%webroot%/%branch%/MS10-054.msu
+	set MS10-061_URL=%webroot%/%branch%/MS10-061.msu
+	set MS12-005_URL=%webroot%/%branch%/MS12-005.msu
+	set MS12-020_URL=%webroot%/%branch%/MS12-020.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo %Patch_Description_MS08-067%
 	call :push_new MS08-067 %MS08-067_URL%
 	echo %Patch_Description_MS09-001%
 	call :push_new MS09-001 %MS09-001_URL%
+	echo %Patch_Description_MS09-050%
+	call :push_new MS09-001 %MS09-050_URL%
 	echo %Patch_Description_MS10-054%
 	call :push_new MS10-054 %MS10-054_URL%
 	echo %Patch_Description_MS10-061%
@@ -191,6 +208,8 @@ goto WinVista_All
 	call :push_new MS12-005 %MS12-005_URL%
 	echo %Patch_Description_MS12-020%
 	call :push_new MS12-020 %MS12-020_URL%
+	echo %Patch_Description_MS15-128%
+	call :push_new MS15-128 %MS15-128_URL%
 goto skel
 
 :WindowsXP
@@ -198,7 +217,7 @@ goto skel
 goto WinXP_%OSARCH%
 
 :WinXP_x64-based
-echo Windows XP 64 bit. No. Just no. I'm not writing anything for this. You're on your own.
+	echo Windows XP 64 bit. No. Just no. I'm not writing anything for this. You're on your own.
 goto EOF
 
 :WinXP_x32-based
@@ -311,7 +330,5 @@ goto skel
 	echo .
 	echo "If this is not a good time to reboot, cancel the reboot with --> /shutdown /a"
      	shutdown /r /t 90 /c "RapidPatch has finished with auto patching - Rebooting this machine in 90 seconds" /d p:2:18
-	rem
-	rem TODO: Add Server 2003/2008/2012 patch lists
 
 :EOF
