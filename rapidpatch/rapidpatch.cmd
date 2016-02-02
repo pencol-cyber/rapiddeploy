@@ -80,8 +80,8 @@ goto Win10_All
 
 :Win10_x32-based
 	echo reached sub arch          %OSARCH% 
-	set branch=Win10/x32
-	set patchdir=Win10_x32
+	set branch=Win10/x86
+	set patchdir=Win10_x86
 
 goto EOF
 
@@ -104,8 +104,8 @@ goto Win8_All
 
 :Win8_x32-based
 	echo reached sub arch          %OSARCH% 
-	set branch=Win7/x86
-	set patchdir=Win7_x86
+	set branch=Win8/x86
+	set patchdir=Win8_x86
 goto Win8_All
 
 :Win8_All
