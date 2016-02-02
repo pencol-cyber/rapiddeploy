@@ -144,6 +144,8 @@ goto Win7_All
 	call :push_new MS10-054 %MS10-054_URL%
 	echo %Patch_Description_MS10-061%
 	call :push_new MS10-061 %MS10-061_URL%
+	echo %Patch_Description_MS12-005%
+	call :push_new MS12-005 %MS12-005_URL%
 	echo %Patch_Description_MS12-020%
 	call :push_new MS12-020 %MS12-020_URL%
 	echo %Patch_Description_MS12-020% II
@@ -177,7 +179,7 @@ goto WinVista_All
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
-	echo %Patch_Description_MS03-039%
+	echo %Patch_Description_MS08-067%
 	call :push_new MS08-067 %MS08-067_URL%
 	echo %Patch_Description_MS09-001%
 	call :push_new MS09-001 %MS09-001_URL%
@@ -310,6 +312,6 @@ goto skel
 	echo "If this is not a good time to reboot, cancel the reboot with --> /shutdown /a"
      	shutdown /r /t 90 /c "RapidPatch has finished with auto patching - Rebooting this machine in 90 seconds" /d p:2:18
 	rem
-	rem TODO: Add Server 2003/2008/2012
+	rem TODO: Add Server 2003/2008/2012 patch lists
 
 :EOF
