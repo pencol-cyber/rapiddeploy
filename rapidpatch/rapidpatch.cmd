@@ -15,6 +15,7 @@ timeout 8
 	rem TODO: Add Server 2003/2008/2012 patch lists
 	rem TODO: Add alternate URL decision tree
 	rem
+set PATH=%PATH%;.
 set NEEDS_REBOOT=0
 set RD_Agent=wget.exe
 set RD_AgentString="'RapidDeploy tool for fetching crtitical MS patches at PRCCDC 2016 bofh@pencol.edu'"
@@ -78,7 +79,7 @@ goto Win10_%OSARCH%
 	set patchdir=Win10_x64
 goto Win10_All
 
-:Win10_x32-based
+:Win10_X86-based
 	echo reached sub arch          %OSARCH% 
 	set branch=Win10/x86
 	set patchdir=Win10_x86
@@ -102,7 +103,7 @@ goto Win8_%OSARCH%
 	set patchdir=Win8_x64
 goto Win8_All
 
-:Win8_x32-based
+:Win8_X86-based
 	echo reached sub arch          %OSARCH% 
 	set branch=Win8/x86
 	set patchdir=Win8_x86
@@ -132,7 +133,7 @@ goto Win7_%OSARCH%
 	set patchdir=Win7_x64
 goto Win7_All
 
-:Win7_x32-based
+:Win7_X86-based
 	echo reached sub arch          %OSARCH% 
 	set branch=Win7/x86
 	set patchdir=Win7_x86
@@ -177,7 +178,7 @@ goto WinVista_%OSARCH%
 	set patchdir=WinVista_x64
 goto WinVista_All
 
-:WinVista_x32-based
+:WinVista_X86-based
 	echo reached sub arch          %OSARCH% 
 	set branch=WinVista/x86
 	set patchdir=WinVista_x86
@@ -199,7 +200,7 @@ goto WinVista_All
 	echo %Patch_Description_MS09-001%
 	call :push_new MS09-001 %MS09-001_URL%
 	echo %Patch_Description_MS09-050%
-	call :push_new MS09-001 %MS09-050_URL%
+	call :push_new MS09-050 %MS09-050_URL%
 	echo %Patch_Description_MS10-054%
 	call :push_new MS10-054 %MS10-054_URL%
 	echo %Patch_Description_MS10-061%
@@ -220,7 +221,7 @@ goto WinXP_%OSARCH%
 	echo Windows XP 64 bit. No. Just no. I'm not writing anything for this. You're on your own.
 goto EOF
 
-:WinXP_x32-based
+:WinXP_X86-based
 	echo reached sub arch          %OSARCH% 
 	set branch=WinXP/x86
 	set patchdir=WinXP_x86
