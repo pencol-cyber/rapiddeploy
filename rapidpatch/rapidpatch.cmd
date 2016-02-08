@@ -15,20 +15,20 @@ timeout 8
 	rem TODO: Add Server 2003/2008/2012 patch lists
 	rem TODO: Add alternate URL decision tree
 	rem
-set PATH=%PATH%;.
 set NEEDS_REBOOT=0
-set RD_Agent=wget.exe
+set RD_Agent=%CD%\wget.exe
 set RD_AgentString="'RapidDeploy tool for fetching crtitical MS patches at PRCCDC 2016 bofh@pencol.edu'"
 cls
 color 07
 echo ###########################################################################
 echo This tool will fetch patches from Github by default. If you want to change  
 echo this behavior invoke repiddeploy with an additional source flag
-echo .
+echo [
 echo Examples:
 echo "rapidpatch.cmd "microsoft"      -- download from windows update "
 echo "rapidpatch.cmd <URL>            -- download from local mirror at <URL> "
-echo .
+echo[
+echo[
 	echo ..... Initiating Sytem Fingerprint
 	systeminfo | find /I "OS Name" > tmp.os
 	systeminfo | find /I "System Type" > tmp.arch
@@ -42,10 +42,11 @@ echo -----------  I will now be using logic for:
 ver
 echo OS:               %OSNAME%
 echo Architecture:     %OSARCH%
-echo .
+echo[
 echo -----------  And will continue with rapid deployment
 echo -----------  Press CNTRL + C if you want to halt me
-echo .
+echo[
+echo[
 set Patch_Description_MS03-039="MS03-039: Remote Code Execution in RPC DCOM aka. MS Blaster"
 set Patch_Description_MS05-039="MS05-039: Remote Code Execution in Plug & Play"
 set Patch_Description_MS07-029="MS07-029: Remote Code Execution in Microsoft DNS Service"
@@ -89,6 +90,7 @@ goto EOF
 :Win10_All
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
+	echo[
 	echo Locked out by M$, sorry friend
 	echo Nothing I can do for Windows 10
 goto EOF
@@ -115,6 +117,7 @@ goto Win8_All
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
+	echo[
 	echo %Patch_Description_MS15-034%
 	call :push_new MS15-034 %MS15-034_URL%
 	echo %Patch_Description_MS15-067%
@@ -150,6 +153,7 @@ goto Win7_All
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
+	echo[
 	echo %Patch_Description_MS10-054%
 	call :push_new MS10-054 %MS10-054_URL%
 	echo %Patch_Description_MS10-061%
@@ -195,6 +199,7 @@ goto WinVista_All
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
+	echo[
 	echo %Patch_Description_MS08-067%
 	call :push_new MS08-067 %MS08-067_URL%
 	echo %Patch_Description_MS09-001%
@@ -238,6 +243,7 @@ goto WinXP_All
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
+	echo[
 	echo %Patch_Description_MS03-039%
 	call :push_old MS03-039 %MS03-039_URL%
 	echo %Patch_Description_MS05-039%
@@ -260,7 +266,9 @@ goto skel
 	color 0a
 	if exist rapid_win.txt start /low /min notepad.exe rapid_win.txt
 	if exist rapid_lose.txt start /low /min notepad.exe rapid_lose.txt
+	echo[
 	echo Please review the autopatching logs to find any mistakes that I have surely made
+	echo[
 	timeout 5
 	if %NEEDS_REBOOT% GEQ 1 (goto :schedule_reboot)
 	goto EOF
@@ -326,10 +334,12 @@ goto skel
 	goto EOF
 
 :schedule_reboot
-	echo .
+	echo[
+	echo[
 	echo "In order to finish patching, I need to reboot the machine now"
-	echo .
-	echo "If this is not a good time to reboot, cancel the reboot with --> /shutdown /a"
+	echo[
+	echo[
+	echo "If now is not a good time to reboot, cancel the reboot with --> /shutdown /a"
      	shutdown /r /t 90 /c "RapidPatch has finished with auto patching - Rebooting this machine in 90 seconds" /d p:2:18
 
 :EOF
