@@ -16,14 +16,14 @@ timeout 8
 	rem TODO: Add alternate URL decision tree
 	rem
 set NEEDS_REBOOT=0
-set RD_Agent=%CD%\wget.exe
+set RD_Agent=%~dp0\wget.exe
 set RD_AgentString="'RapidDeploy tool for fetching crtitical MS patches at PRCCDC 2016 bofh@pencol.edu'"
 cls
 color 07
 echo ###########################################################################
 echo This tool will fetch patches from Github by default. If you want to change  
 echo this behavior invoke repiddeploy with an additional source flag
-echo [
+echo[
 echo Examples:
 echo "rapidpatch.cmd "microsoft"      -- download from windows update "
 echo "rapidpatch.cmd <URL>            -- download from local mirror at <URL> "
@@ -67,7 +67,10 @@ set Patch_Description_MS15-128="MS15-128: Remote Code Execution in .NET Framewor
 set webroot=https://github.com/pencol-cyber/patches/raw/master
 
 timeout 6
-rem echo %OSNAME%
+	rem echo %OSNAME%
+	rem Fixup for 'WindowsVistaT' edge case
+	rem
+	if %OSNAME% == "WindowsVistaT" (set OSNAME=WindowsVista)
 goto %OSNAME%
 
 :Windows10
@@ -290,15 +293,14 @@ goto skel
 	dir %patchdir%\%1
 	echo Do you want me to remove it?
 	set /P CONFIRM=[y/N]  
-	if /I %CONFIRM%==y del %patchdir%\%1
-	if /I %CONFIRM%==n echo keeping the file
-	CONFIRM=""
+	if /I %CONFIRM% == "y" (del %patchdir%\%1) ELSE echo keeping the file
+	set CONFIRM=""
 	goto EOF
 
 :fetch_patch
 	color 0c
-	echo Invoking: %RD_Agent% -U %RD_AgentString% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 15 -a debug.txt >> rapid_win.txt
-	start /wait %RD_Agent% %2 -v --no-check-certificate -O %patchdir%\%1 -t 5 -T 15 -a debug.txt -U %RD_AgentString%
+	echo Invoking: %RD_Agent% -U %RD_AgentString% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt >> rapid_win.txt
+	start /wait %RD_Agent% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U %RD_AgentString%
 	goto EOF
 
 
@@ -340,6 +342,6 @@ goto skel
 	echo[
 	echo[
 	echo "If now is not a good time to reboot, cancel the reboot with --> /shutdown /a"
-     	shutdown /r /t 90 /c "RapidPatch has finished with auto patching - Rebooting this machine in 90 seconds" /d p:2:18
+     	shutdown /r /t 45 /c "RapidPatch has finished with auto patching - Rebooting this machine in 45 seconds" /d p:2:18
 
 :EOF
