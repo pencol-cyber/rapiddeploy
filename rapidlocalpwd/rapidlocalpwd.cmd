@@ -40,21 +40,21 @@ goto :eof
 
 :verify
 echo Verifying basic sanity for %1 ....
-if not %1 == "" call :chpass %1 
-goto :eof
-
-:chpass
 echo [ %1 ]   user information
 net user %1 | findstr /C:"Account Active"
 net user %1 | findstr /C:"Local Group Memberships"
 net user %1 | findstr /C:"Password last set"
 net user %1 | findstr /C:"Comment"
+if not %1 == "" call :chpass %1 
+goto :eof
+
+:chpass
 @echo[       
 echo [!] Changing %1's password to [ %newpass01% ]
-echo net user %1 %newpass01% /comment:"Password changed by Rapiddeploy PRCCDC Toolkit at %TIME% on %DATE%"
-echo .... Updated information for %1
+echo net user %1 %newpass01% /comment:"Password changed by Rapiddeploy PRCCDC Toolkit"
+echo .... Updated password information for %1
 net user %1 | findstr /C:"Password last set"
-net user %1 | findstr /C:"Comment"
+net user %1 | findstr /C:"Last Logon"
 echo "[!] .... Done"
 @echo[     
 goto :eof
