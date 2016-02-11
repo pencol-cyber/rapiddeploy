@@ -306,8 +306,8 @@ goto skel
 
 :install_patch_oldstyle
 	color 0f
-	echo Invoking: C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1.exe >> rapid_win.txt
-	start /wait C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1.exe
+	echo Invoking: C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1 >> rapid_win.txt
+	start /wait C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1
 	rem if %ERRORLEVEL%==0 set LAST_SUCCESS=1
 	call :success_patch %1
 	goto EOF
