@@ -10,9 +10,10 @@ echo   rrr   rrr   ddd  ddd                                  bofh@pencol.edu  ##
 echo   rrr         dddd ddd                                                   ##\
 echo   rrr          ddddddd                                                   ##\
 echo   rrr
+echo[
 timeout 8
 	rem
-	rem TODO: Add Server 2003/2008/2012 patch lists
+	rem TODO: Add Server 2008 R2 patchlist
 	rem TODO: Add alternate URL decision tree
 	rem
 set NEEDS_REBOOT=0
@@ -32,7 +33,9 @@ echo[
 	echo ..... Initiating Sytem Fingerprint
 	systeminfo | find /I "OS Name" > tmp.os
 	systeminfo | find /I "System Type" > tmp.arch
-	FOR /F "eol=; tokens=4,5 delims= " %%i in (tmp.os) do set OSNAME=%%i%%j
+	FOR /F "eol=; tokens=4,5 delims= " %%k in (tmp.os) do set OSNAME=%%k%%l
+	FOR /F "eol=; tokens=6 delims= " %%h in (tmp.os) do set SERVER_VER=%%h
+	FOR /F "eol=; tokens=7 delims= " %%g in (tmp.os) do set SERVER_REV=%%g
 	FOR /F "eol=; tokens=3 delims= " %%i in (tmp.arch) do set OSARCH=%%i
 	del tmp.os tmp.arch rapid_win.txt rapid_lose.txt
 	echo ..... Complete
@@ -40,7 +43,7 @@ cls
 echo ###########################################################################
 echo -----------  I will now be using logic for:
 ver
-echo OS:               %OSNAME%
+echo OS:               %OSNAME% %SERVER_VER% %SERVER_REV%
 echo Architecture:     %OSARCH%
 echo[
 echo -----------  And will continue with rapid deployment
@@ -68,10 +71,18 @@ set webroot=https://github.com/pencol-cyber/patches/raw/master
 
 timeout 6
 	rem echo %OSNAME%
-	rem Fixup for 'WindowsVistaT' edge case
+	rem Fixup for 'Windows VistaT' edge case in WinVista
+	rem Fixup for 'Windows Serverr' edge case in WS2008
+	rem Someone please help MS engineers with spell
 	rem
-	if %OSNAME% == "WindowsVistaT" (set OSNAME=WindowsVista)
-goto %OSNAME%
+	set FIXUP=%OSNAME%
+	if %OSNAME%==WindowsVistaT (set FIXUP=WindowsVista)
+	if %OSNAME%==WindowsServerr (set FIXUP=WindowsServer)
+	rem echo %FIXUP%
+goto %FIXUP%
+
+:WindowsServer
+	goto %FIXUP%%SERVER_VER%
 
 :Windows10
 	echo Assembling Patch list for %OSNAME%
@@ -263,6 +274,191 @@ goto WinXP_All
 	call :push_old MS12-005 %MS12-005_URL%
 	echo %Patch_Description_MS12-020%
 	call :push_old MS12-020 %MS12-020_URL%
+goto skel
+
+
+:WindowsServer2012
+	echo Assembling Patch list for %OSNAME%%SERVER_VER%
+	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
+goto WS2012_%OSARCH%
+
+:WS2012_x64-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2012/x64
+	set patchdir=WS2012_x64
+	if /I %SERVER_REV% == "R2" (goto WS2012_R2)
+goto WS2012_Base
+
+:WS2012_X86-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2012/x86
+	set patchdir=WS2012_x86
+	echo "32 bit WS2012? No such agency, amigo"
+goto eof
+
+:WS2012_Base
+	set MS14-025_URL=%webroot%/%branch%/MS14-025.msu
+	set MS14-068_URL=%webroot%/%branch%/MS14-068.msu
+	set MS15-034_URL=%webroot%/%branch%/MS15-034.msu
+	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
+	set MS15-127_URL=%webroot%/%branch%/MS15-127.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
+	if not exist %patchdir% (mkdir %patchdir%)
+	echo Fetching and then installing packages .......
+	echo[
+	echo %Patch_Description_MS14-025%
+	call :push_new MS14-025 %MS14-05_URL%
+	echo %Patch_Description_MS14-068%
+	call :push_new MS14-068 %MS14-068_URL%
+	echo %Patch_Description_MS15-034%
+	call :push_new MS15-034 %MS15-034_URL%
+	echo %Patch_Description_MS15-067%
+	call :push_new MS15-067 %MS15-067_URL%
+	echo %Patch_Description_MS15-127%
+	call :push_new MS15-127 %MS15-127_URL%
+	echo %Patch_Description_MS15-128%
+	call :push_new MS15-128 %MS15-128_URL%
+goto skel
+
+:WS2012_R2
+	set MS14-025_URL=%webroot%/%branch%/MS14-025_Server_R2.msu
+	set MS14-025b_URL=%webroot%/%branch%/MS14-025_Server_R2-v2.msu
+	set MS14-068_URL=%webroot%/%branch%/MS14-068_Server_R2.msu
+	set MS15-127_URL=%webroot%/%branch%/MS15-127_Server_R2.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128_Server_R2.msu
+	if not exist %patchdir% (mkdir %patchdir%)
+	echo Fetching and then installing additional R2 packages .......
+	echo[
+	echo %Patch_Description_MS14-025% for R2
+	call :push_new MS14-025_Server_R2 %MS14-025_URL%
+	echo %Patch_Description_MS14-025% for R2 II
+	call :push_new MS14-025_Server_R2-v2 %MS14-025b_URL%
+	echo %Patch_Description_MS14-068% for R2
+	call :push_new MS14-068_Server_R2 %MS14-068_URL%
+	echo %Patch_Description_MS15-127% for R2
+	call :push_new MS15-127_Server_R2 %MS15-127_URL%
+	echo %Patch_Description_MS15-128% for R2
+	call :push_new MS15-128_Server_R2 %MS15-128_URL%
+goto skel
+
+:WindowsServer2008
+	echo Assembling Patch list for %OSNAME%%SERVER_VER%
+	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
+goto WS2008_%OSARCH%
+
+:WS2008_x64-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2008/x64
+	set patchdir=WS2008_x64
+	if /I %SERVER_REV% == "R2" (goto WS2008_R2)
+goto WS2008_Base
+
+:WS2008_X86-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2008/x86
+	set patchdir=WS2008_x86
+goto WS2008_Base
+
+:WS2008_Base
+	set MS08-067_URL=%webroot%/%branch%/MS08-067.msu
+	set MS09-001_URL=%webroot%/%branch%/MS09-001.msu
+	set MS09-050_URL=%webroot%/%branch%/MS09-050.msu
+	set MS10-054_URL=%webroot%/%branch%/MS10-054.msu
+	set MS10-061_URL=%webroot%/%branch%/MS10-061.msu
+	set MS10-065_URL=%webroot%/%branch%/MS10-065.msu
+	set MS12-005_URL=%webroot%/%branch%/MS12-005.msu
+	set MS12-020_URL=%webroot%/%branch%/MS12-020.msu
+	set MS14-025_URL=%webroot%/%branch%/MS14-025.msu
+	set MS14-068_URL=%webroot%/%branch%/MS14-068.msu
+	set MS15-127_URL=%webroot%/%branch%/MS15-127.msu
+	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
+	if not exist %patchdir% (mkdir %patchdir%)
+	echo Fetching and then installing packages .......
+	echo[
+	echo %Patch_Description_MS08-067%
+	call :push_new MS08-067 %MS08-067_URL%
+	echo %Patch_Description_MS09-001%
+	call :push_new MS09-001 %MS09-001_URL%
+	echo %Patch_Description_MS09-050%
+	call :push_new MS09-050 %MS09-050_URL%
+	echo %Patch_Description_MS10-054%
+	call :push_new MS10-054 %MS10-054_URL%
+	echo %Patch_Description_MS10-061%
+	call :push_new MS10-061 %MS10-061_URL%
+	echo %Patch_Description_MS10-065%
+	call :push_new MS10-065 %MS10-065_URL%
+	echo %Patch_Description_MS12-005%
+	call :push_new MS12-005 %MS12-005_URL%
+	echo %Patch_Description_MS12-020%
+	call :push_new MS12-020 %MS12-020_URL%
+	echo %Patch_Description_MS14-025%
+	call :push_new MS14-025 %MS14-025_URL%
+	echo %Patch_Description_MS14-068%
+	call :push_new MS14-068 %MS14-068_URL%
+	echo %Patch_Description_MS15-128%
+	call :push_new MS15-128 %MS15-128_URL%
+goto skel
+
+:WS2008_R2
+	if not exist %patchdir% (mkdir %patchdir%)
+	echo Fetching and then installing additional R2 packages .......
+	echo[
+goto skel
+
+:WindowsServer2003
+	echo Assembling Patch list for %OSNAME%%SERVER_VER%
+	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
+goto WS2003_%OSARCH%
+
+:WS2003_x64-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2003/x64
+	set patchdir=WS2003_x64
+goto WS2008_Base
+
+:WS2003_X86-based
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2003/x86
+	set patchdir=WS2003_x86
+goto WS2003_Base
+
+:WS2003_Base
+	set MS03-039_URL=%webroot%/%branch%/MS03-039.exe
+	set MS05-039_URL=%webroot%/%branch%/MS05-039.exe
+	set MS07-029_URL=%webroot%/%branch%/MS07-029.exe
+	set MS08-067_URL=%webroot%/%branch%/MS08-067.exe
+	set MS09-001_URL=%webroot%/%branch%/MS09-001.exe
+	set MS10-054_URL=%webroot%/%branch%/MS10-054.exe
+	set MS10-061_URL=%webroot%/%branch%/MS10-061.exe
+	set MS10-065_URL=%webroot%/%branch%/MS10-065.exe
+	set MS12-005_URL=%webroot%/%branch%/MS12-005.exe
+	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
+	set MS14-068_URL=%webroot%/%branch%/MS14-068.exe
+	if not exist %patchdir% (mkdir %patchdir%)
+	echo Fetching and then installing packages .......
+	echo[
+	echo %Patch_Description_MS03-039%
+	call :push_old MS03-039 %MS03-039_URL%
+	echo %Patch_Description_MS05-039%
+	call :push_old MS05-039 %MS05-039_URL%
+	echo %Patch_Description_MS07-029%
+	call :push_old MS07-029 %MS07-029_URL%
+	echo %Patch_Description_MS08-067%
+	call :push_old MS08-067 %MS08-067_URL%
+	echo %Patch_Description_MS09-001%
+	call :push_old MS09-001 %MS09-001_URL%
+	echo %Patch_Description_MS10-054%
+	call :push_old MS10-054 %MS10-054_URL%
+	echo %Patch_Description_MS10-061%
+	call :push_old MS10-061 %MS10-061_URL%
+	echo %Patch_Description_MS10-065%
+	call :push_old MS10-065 %MS10-065_URL%
+	echo %Patch_Description_MS12-005%
+	call :push_old MS12-005 %MS12-005_URL%
+	echo %Patch_Description_MS12-020%
+	call :push_old MS12-020 %MS12-020_URL%
+	echo %Patch_Description_MS14-068%
+	call :push_old MS14-068 %MS14-068_URL%
 goto skel
 
 :skel
