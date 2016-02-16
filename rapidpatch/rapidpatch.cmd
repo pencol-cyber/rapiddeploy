@@ -13,8 +13,10 @@ echo   rrr
 echo[
 timeout 8
 	rem
-	rem TODO: Add Server 2008 R2 patchlist
 	rem TODO: Add alternate URL decision tree
+	rem
+	rem This is quick & dirty patching for CCDC
+	rem for the love of FSM do not run this on anything important
 	rem
 set NEEDS_REBOOT=0
 set RD_Agent=%~dp0\wget.exe
@@ -400,9 +402,27 @@ goto WS2008_Base
 goto skel
 
 :WS2008_R2
+	set MS10-061_URL=%webroot%/%branch%/MS10-061_Server_R2.msu
+	set MS12-005_URL=%webroot%/%branch%/MS12-005_Server_R2.msu
+	set MS12-020_URL=%webroot%/%branch%/MS12-020_Server_R2.msu
+	set MS14-025_URL=%webroot%/%branch%/MS14-025_Server_R2.msu
+	set MS14-068_URL=%webroot%/%branch%/MS14-068_Server_R2.msu
+	set MS15-127_URL=%webroot%/%branch%/MS15-127_Server_R2.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing additional R2 packages .......
 	echo[
+	echo %Patch_Description_MS10-061% for R2
+	call :push_new MS10-061_Server_R2 %MS10-061_URL%
+	echo %Patch_Description_MS12-005% for R2
+	call :push_new MS12-005_Server_R2 %MS12-005_URL%
+	echo %Patch_Description_MS12-020% for R2
+	call :push_new MS12-020_Server_R2 %MS12-020_URL%
+	echo %Patch_Description_MS14-025% for R2
+	call :push_new MS14-025_Server_R2 %MS14-025_URL%
+	echo %Patch_Description_MS14-068% for R2
+	call :push_new MS14-068_Server_R2 %MS14-068_URL%
+	echo %Patch_Description_MS15-127% for R2
+	call :push_new MS15-127_Server_R2 %MS15-127_URL%
 goto skel
 
 :WindowsServer2003
@@ -414,7 +434,7 @@ goto WS2003_%OSARCH%
 	echo reached sub arch          %OSARCH% 
 	set branch=WS2003/x64
 	set patchdir=WS2003_x64
-goto WS2008_Base
+goto WS2003_Base
 
 :WS2003_X86-based
 	echo reached sub arch          %OSARCH% 
