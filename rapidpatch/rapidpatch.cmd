@@ -52,23 +52,25 @@ echo -----------  And will continue with rapid deployment
 echo -----------  Press CNTRL + C if you want to halt me
 echo[
 echo[
-set Patch_Description_MS03-039="MS03-039: Remote Code Execution in RPC DCOM aka. MS Blaster"
-set Patch_Description_MS05-039="MS05-039: Remote Code Execution in Plug & Play"
-set Patch_Description_MS07-029="MS07-029: Remote Code Execution in Microsoft DNS Service"
-set Patch_Description_MS08-067="MS08-067: Remote Code Execution in Windows Server Service aka. Red Teams Little Helper"
-set Patch_Description_MS09-001="MS09-001: Remote Code Execution in SMB service"
-set Patch_Description_MS09-050="MS09-050: Vulnerabilities in SMBv2 trigger Remote Code Execution"
-set Patch_Description_MS10-054="MS10-054: Multiple Vulnerabilites trigger Remote Code Execution in SMB service"
-set Patch_Description_MS10-061="MS10-061: Remote Code Execution in Print Spooler Service"
-set Patch_Description_MS10-065="MS10-065: Multiple Vulnerabilites in Internet Information Services"
-set Patch_Description_MS12-005="MS12-005: Remote Code Execution in Microsoft Office dispatcher"
-set Patch_Description_MS12-020="MS12-020: Denial of Service Condition in Remote Desktop Protocol"
-set Patch_Description_MS14-025="MS14-025: Security Update to address Pass The Hash authentication aka. PTH"
-set Patch_Description_MS14-068="MS14-068: Flaws in Kerberos Authentication could lead to complete Domain pwnage aka. MimiKatz"
-set Patch_Description_MS15-034="MS15-034: Remote code execution in HTTP.sys driver"
-set Patch_Description_MS15-067="MS15-067: Remote Code Execution in Windows Remote Desktop Protocol"
-set Patch_Description_MS15-127="MS15-127: Remote Code Execution in Active Directory DNS Service"
-set Patch_Description_MS15-128="MS15-128: Remote Code Execution in .NET Framework"
+set Patch_Description_MS03-039="MS03-039: Remote Code Execution in RPC DCOM aka. MS Blaster KB8824146"
+set Patch_Description_MS05-039="MS05-039: Remote Code Execution in Plug & Play KB899588"
+set Patch_Description_MS07-029="MS07-029: Remote Code Execution in Microsoft DNS Service KB935966"
+set Patch_Description_MS08-067="MS08-067: Remote Code Execution in Windows Server Service aka. Red Teams Little Helper KB958644"
+set Patch_Description_MS09-001="MS09-001: Remote Code Execution in SMB service KB958687"
+set Patch_Description_MS09-050="MS09-050: Vulnerabilities in SMBv2 trigger Remote Code Execution KB975517"
+set Patch_Description_MS10-054="MS10-054: Multiple Vulnerabilites trigger Remote Code Execution in SMB service KB982214"
+set Patch_Description_MS10-061="MS10-061: Remote Code Execution in Print Spooler Service KB2347290"
+set Patch_Description_MS10-065="MS10-065: Multiple Vulnerabilites in Internet Information Services KB2124261"
+set Patch_Description_MS12-005="MS12-005: Remote Code Execution in Microsoft Office dispatcher KB2584146"
+set Patch_Description_MS12-020="MS12-020: Denial of Service Condition in Remote Desktop Protocol KB2621440"
+set Patch_Description_MS14-025="MS14-025: Security Update to address poorly stored Credentials KB2928120"
+set Patch_Description_MS14-CRED="MS14-CRED: Security Update to address poorly stored Credentials aka. MimiKatz KB2871997"
+set Patch_Description_MS14-068="MS14-068: Flaws in Kerberos Authentication could lead to complete Domain pwnage aka. MimiKatz KB3011780"
+set Patch_Description_MS15-034="MS15-034: Remote code execution in HTTP.sys driver KB3042553"
+set Patch_Description_MS15-067="MS15-067: Remote Code Execution in Windows Remote Desktop Protocol KB3067904"
+set Patch_Description_MS15-076="MS15-076: Trebuchet UAC bypass from Throwback toolkit KB3067505"
+set Patch_Description_MS15-127="MS15-127: Remote Code Execution in Active Directory DNS Service KB3100465"
+set Patch_Description_MS15-128="MS15-128: Remote Code Execution in .NET Framework KB3109094"
 set webroot=https://github.com/pencol-cyber/patches/raw/master
 
 timeout 6
@@ -76,10 +78,12 @@ timeout 6
 	rem Fixup for 'Windows VistaT' edge case in WinVista
 	rem Fixup for 'Windows Serverr' edge case in WS2008
 	rem Someone please help MS engineers with spell
+	rem Fixup for randomly inserted copyright tag in WS2003
 	rem
 	set FIXUP=%OSNAME%
 	if %OSNAME%==WindowsVistaT (set FIXUP=WindowsVista)
 	if %OSNAME%==WindowsServerr (set FIXUP=WindowsServer)
+	if %OSNAME%==Windows(R)Server (set FIXUP=WindowsServer)
 	rem echo %FIXUP%
 goto %FIXUP%
 
@@ -100,8 +104,7 @@ goto Win10_All
 	echo reached sub arch          %OSARCH% 
 	set branch=Win10/x86
 	set patchdir=Win10_x86
-
-goto EOF
+goto Win10_All
 
 :Win10_All
 	if not exist %patchdir% (mkdir %patchdir%)
@@ -128,16 +131,22 @@ goto Win8_All
 goto Win8_All
 
 :Win8_All
+	set MS14-CRED_URL=%webroot%/%branch%/MS14-CRED.msu
 	set MS15-034_URL=%webroot%/%branch%/MS15-034.msu
 	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo[
+	echo %Patch_Description_MS14-CRED%
+	call :push_new MS14-CRED %MS14-CRED_URL%
 	echo %Patch_Description_MS15-034%
 	call :push_new MS15-034 %MS15-034_URL%
 	echo %Patch_Description_MS15-067%
 	call :push_new MS15-067 %MS15-067_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_new MS15-076 %MS15-076_URL%
 	echo %Patch_Description_MS15-128%
 	call :push_new MS15-128 %MS15-128_URL%
 goto skel
@@ -164,8 +173,10 @@ goto Win7_All
 	set MS12-005_URL=%webroot%/%branch%/MS12-005.msu
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.msu
 	set MS12-020b_URL=%webroot%/%branch%/MS12-020-v2.msu
+	set MS14-CRED_URL=%webroot%/%branch%/MS14-CRED.msu
 	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
 	set MS15-067b_URL=%webroot%/%branch%/MS15-067-v2.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
@@ -180,10 +191,14 @@ goto Win7_All
 	call :push_new MS12-020 %MS12-020_URL%
 	echo %Patch_Description_MS12-020% II
 	call :push_new MS12-020-v2 %MS12-020b_URL%
+	echo %Patch_Description_MS14-CRED%
+	call :push_new MS14-CRED %MS14-CRED_URL%
 	echo %Patch_Description_MS15-067%
 	call :push_new MS15-067 %MS15-067_URL%
 	echo %Patch_Description_MS15-067% II
 	call :push_new MS15-067-v2 %MS15-067b_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_new MS15-076 %MS15-076_URL%
 	echo %Patch_Description_MS15-128%
 	call :push_new MS15-128 %MS15-128_URL%
 goto skel
@@ -212,6 +227,7 @@ goto WinVista_All
 	set MS10-061_URL=%webroot%/%branch%/MS10-061.msu
 	set MS12-005_URL=%webroot%/%branch%/MS12-005.msu
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
@@ -230,6 +246,8 @@ goto WinVista_All
 	call :push_new MS12-005 %MS12-005_URL%
 	echo %Patch_Description_MS12-020%
 	call :push_new MS12-020 %MS12-020_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_new MS15-076 %MS15-076_URL%
 	echo %Patch_Description_MS15-128%
 	call :push_new MS15-128 %MS15-128_URL%
 goto skel
@@ -239,8 +257,13 @@ goto skel
 goto WinXP_%OSARCH%
 
 :WinXP_x64-based
-	echo Windows XP 64 bit. No. Just no. I'm not writing anything for this. You're on your own.
-goto EOF
+	echo reached sub arch          %OSARCH% 
+	set branch=WS2003/x64
+	set patchdir=WS2003_x64
+	echo Windows XP 64 bit.
+	echo We'll try the Windows Server 2003 x64 branch it sometimes works.
+	echo If it doesnt, sorry. 
+goto WS2003_x64-based
 
 :WinXP_X86-based
 	echo reached sub arch          %OSARCH% 
@@ -300,9 +323,11 @@ goto eof
 
 :WS2012_Base
 	set MS14-025_URL=%webroot%/%branch%/MS14-025.msu
+	set MS14-CRED_URL=%webroot%/%branch%/MS14-CRED.msu
 	set MS14-068_URL=%webroot%/%branch%/MS14-068.msu
 	set MS15-034_URL=%webroot%/%branch%/MS15-034.msu
 	set MS15-067_URL=%webroot%/%branch%/MS15-067.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.msu
 	set MS15-127_URL=%webroot%/%branch%/MS15-127.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
@@ -310,12 +335,16 @@ goto eof
 	echo[
 	echo %Patch_Description_MS14-025%
 	call :push_new MS14-025 %MS14-05_URL%
+	echo %Patch_Description_MS14-CRED%
+	call :push_new MS14-CRED %MS14-CRED_URL%
 	echo %Patch_Description_MS14-068%
 	call :push_new MS14-068 %MS14-068_URL%
 	echo %Patch_Description_MS15-034%
 	call :push_new MS15-034 %MS15-034_URL%
 	echo %Patch_Description_MS15-067%
 	call :push_new MS15-067 %MS15-067_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_new MS15-076 %MS15-076_URL%
 	echo %Patch_Description_MS15-127%
 	call :push_new MS15-127 %MS15-127_URL%
 	echo %Patch_Description_MS15-128%
@@ -326,6 +355,7 @@ goto skel
 	set MS14-025_URL=%webroot%/%branch%/MS14-025_Server_R2.msu
 	set MS14-025b_URL=%webroot%/%branch%/MS14-025_Server_R2-v2.msu
 	set MS14-068_URL=%webroot%/%branch%/MS14-068_Server_R2.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076_Server_R2.msu
 	set MS15-127_URL=%webroot%/%branch%/MS15-127_Server_R2.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128_Server_R2.msu
 	if not exist %patchdir% (mkdir %patchdir%)
@@ -337,6 +367,8 @@ goto skel
 	call :push_new MS14-025_Server_R2-v2 %MS14-025b_URL%
 	echo %Patch_Description_MS14-068% for R2
 	call :push_new MS14-068_Server_R2 %MS14-068_URL%
+	echo %Patch_Description_MS15-076% for R2
+	call :push_new MS15-076_Server_R2 %MS15-076_URL%
 	echo %Patch_Description_MS15-127% for R2
 	call :push_new MS15-127_Server_R2 %MS15-127_URL%
 	echo %Patch_Description_MS15-128% for R2
@@ -372,6 +404,7 @@ goto WS2008_Base
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.msu
 	set MS14-025_URL=%webroot%/%branch%/MS14-025.msu
 	set MS14-068_URL=%webroot%/%branch%/MS14-068.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.msu
 	set MS15-127_URL=%webroot%/%branch%/MS15-127.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128.msu
 	if not exist %patchdir% (mkdir %patchdir%)
@@ -397,6 +430,8 @@ goto WS2008_Base
 	call :push_new MS14-025 %MS14-025_URL%
 	echo %Patch_Description_MS14-068%
 	call :push_new MS14-068 %MS14-068_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_new MS15-076 %MS15-076_URL%
 	echo %Patch_Description_MS15-128%
 	call :push_new MS15-128 %MS15-128_URL%
 goto skel
@@ -406,7 +441,9 @@ goto skel
 	set MS12-005_URL=%webroot%/%branch%/MS12-005_Server_R2.msu
 	set MS12-020_URL=%webroot%/%branch%/MS12-020_Server_R2.msu
 	set MS14-025_URL=%webroot%/%branch%/MS14-025_Server_R2.msu
+	set MS14-CRED_URL=%webroot%/%branch%/MS14-CRED_Server_R2.msu
 	set MS14-068_URL=%webroot%/%branch%/MS14-068_Server_R2.msu
+	set MS15-076_URL=%webroot%/%branch%/MS15-076_Server_R2.msu
 	set MS15-127_URL=%webroot%/%branch%/MS15-127_Server_R2.msu
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing additional R2 packages .......
@@ -417,17 +454,20 @@ goto skel
 	call :push_new MS12-005_Server_R2 %MS12-005_URL%
 	echo %Patch_Description_MS12-020% for R2
 	call :push_new MS12-020_Server_R2 %MS12-020_URL%
+	echo %Patch_Description_MS14-CRED% for R2
+	call :push_new MS14-CRED %MS14-CRED_URL%
 	echo %Patch_Description_MS14-025% for R2
 	call :push_new MS14-025_Server_R2 %MS14-025_URL%
 	echo %Patch_Description_MS14-068% for R2
 	call :push_new MS14-068_Server_R2 %MS14-068_URL%
+	echo %Patch_Description_MS15-076% for R2
+	call :push_new MS15-076_Server_R2 %MS15-076_URL%
 	echo %Patch_Description_MS15-127% for R2
 	call :push_new MS15-127_Server_R2 %MS15-127_URL%
 goto skel
 
 :WindowsServer2003
 	echo Assembling Patch list for %OSNAME%%SERVER_VER%
-	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
 goto WS2003_%OSARCH%
 
 :WS2003_x64-based
@@ -454,6 +494,7 @@ goto WS2003_Base
 	set MS12-005_URL=%webroot%/%branch%/MS12-005.exe
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
 	set MS14-068_URL=%webroot%/%branch%/MS14-068.exe
+	set MS15-076_URL=%webroot%/%branch%/MS15-076.exe
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo[
@@ -479,6 +520,8 @@ goto WS2003_Base
 	call :push_old MS12-020 %MS12-020_URL%
 	echo %Patch_Description_MS14-068%
 	call :push_old MS14-068 %MS14-068_URL%
+	echo %Patch_Description_MS15-076%
+	call :push_old MS15-076 %MS15-076_URL%
 goto skel
 
 :skel
@@ -516,7 +559,7 @@ goto skel
 :fetch_patch
 	color 0c
 	echo Invoking: %RD_Agent% -U %RD_AgentString% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt >> rapid_win.txt
-	start /wait %RD_Agent% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U %RD_AgentString%
+	start /wait "%RD_Agent%" %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U "%RD_AgentString%"
 	goto EOF
 
 
