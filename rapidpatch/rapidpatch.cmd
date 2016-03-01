@@ -278,7 +278,6 @@ goto WinXP_All
 	set MS09-001_URL=%webroot%/%branch%/MS09-001.exe
 	set MS10-054_URL=%webroot%/%branch%/MS10-054.exe
 	set MS10-061_URL=%webroot%/%branch%/MS10-061.exe
-	set MS12-005_URL=%webroot%/%branch%/MS12-005.exe
 	set MS12-020_URL=%webroot%/%branch%/MS12-020.exe
 	if not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
@@ -295,8 +294,6 @@ goto WinXP_All
 	call :push_old MS10-054 %MS10-054_URL%
 	echo %Patch_Description_MS10-061%
 	call :push_old MS10-061 %MS10-061_URL%
-	echo %Patch_Description_MS12-005%
-	call :push_old MS12-005 %MS12-005_URL%
 	echo %Patch_Description_MS12-020%
 	call :push_old MS12-020 %MS12-020_URL%
 goto skel
@@ -334,7 +331,7 @@ goto eof
 	echo Fetching and then installing packages .......
 	echo[
 	echo %Patch_Description_MS14-025%
-	call :push_new MS14-025 %MS14-05_URL%
+	call :push_new MS14-025 %MS14-025_URL%
 	echo %Patch_Description_MS14-CRED%
 	call :push_new MS14-CRED %MS14-CRED_URL%
 	echo %Patch_Description_MS14-068%
@@ -537,7 +534,7 @@ goto skel
 
 :push_old
 	if exist %patchdir%\%1.exe call :cleanup %1.exe
-	if not exist %patchdir%\%1.exe call :fetch_patch %1.exe %2
+	if not exist %patchdir%\%1.exe call :fetch_old %1.exe %2
 	if exist %patchdir%\%1.exe call :install_patch_oldstyle %1.exe
 	goto EOF
 
@@ -556,17 +553,22 @@ goto skel
 	set CONFIRM=""
 	goto EOF
 
+:fetch_old
+	color 0c
+	echo Invoking: %RD_Agent% -U %RD_AgentString% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt >> rapid_win.txt
+	"%RD_Agent%" %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U %RD_AgentString%
+	goto EOF
+
 :fetch_patch
 	color 0c
 	echo Invoking: %RD_Agent% -U %RD_AgentString% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt >> rapid_win.txt
-	start /wait "%RD_Agent%" %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U "%RD_AgentString%"
+	start /wait %RD_Agent% %2 --no-check-certificate -O %patchdir%\%1 -t 5 -T 20 -a debug.txt -U %RD_AgentString%
 	goto EOF
-
 
 :install_patch_oldstyle
 	color 0f
-	echo Invoking: C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1 >> rapid_win.txt
-	start /wait C:\Windows\System32\msiexec.exe /passive /norestart /i %patchdir%\%1
+	echo Invoking: %patchdir%\%1 /norestart /passive >> rapid_win.txt
+	start /wait %patchdir%\%1 /norestart /passive
 	rem if %ERRORLEVEL%==0 set LAST_SUCCESS=1
 	call :success_patch %1
 	goto EOF
