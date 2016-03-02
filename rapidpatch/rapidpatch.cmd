@@ -81,9 +81,9 @@ timeout 6
 	rem Fixup for randomly inserted copyright tag in WS2003
 	rem
 	set FIXUP=%OSNAME%
-	if %OSNAME%==WindowsVistaT (set FIXUP=WindowsVista)
-	if %OSNAME%==WindowsServerr (set FIXUP=WindowsServer)
-	if %OSNAME%==Windows(R)Server (set FIXUP=WindowsServer)
+	IF %OSNAME%==WindowsVistaT (set FIXUP=WindowsVista)
+	IF %OSNAME%==WindowsServerr (set FIXUP=WindowsServer)
+	IF %OSNAME%==Windows(R)Server (set FIXUP=WindowsServer)
 	rem echo %FIXUP%
 goto %FIXUP%
 
@@ -107,7 +107,7 @@ goto Win10_All
 goto Win10_All
 
 :Win10_All
-	if not exist %patchdir% (mkdir %patchdir%)
+	IF not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing packages .......
 	echo[
 	echo Locked out by M$, sorry friend
@@ -301,14 +301,14 @@ goto skel
 
 :WindowsServer2012
 	echo Assembling Patch list for %OSNAME%%SERVER_VER%
-	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
+	IF /I %SERVER_REV%==R2 (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
 goto WS2012_%OSARCH%
 
 :WS2012_x64-based
 	echo reached sub arch          %OSARCH% 
 	set branch=WS2012/x64
 	set patchdir=WS2012_x64
-	if /I %SERVER_REV% == "R2" (goto WS2012_R2)
+	IF /I %SERVER_REV%==R2 (goto WS2012_R2)
 goto WS2012_Base
 
 :WS2012_X86-based
@@ -355,7 +355,7 @@ goto skel
 	set MS15-076_URL=%webroot%/%branch%/MS15-076_Server_R2.msu
 	set MS15-127_URL=%webroot%/%branch%/MS15-127_Server_R2.msu
 	set MS15-128_URL=%webroot%/%branch%/MS15-128_Server_R2.msu
-	if not exist %patchdir% (mkdir %patchdir%)
+	IF not exist %patchdir% (mkdir %patchdir%)
 	echo Fetching and then installing additional R2 packages .......
 	echo[
 	echo %Patch_Description_MS14-025% for R2
@@ -374,14 +374,14 @@ goto skel
 
 :WindowsServer2008
 	echo Assembling Patch list for %OSNAME%%SERVER_VER%
-	if /I %SERVER_REV% == "R2" (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
+	IF /I %SERVER_REV%==R2 (echo This appears to be %OSNAME%%SERVER_VER% %SERVER_REV%)
 goto WS2008_%OSARCH%
 
 :WS2008_x64-based
 	echo reached sub arch          %OSARCH% 
 	set branch=WS2008/x64
 	set patchdir=WS2008_x64
-	if /I %SERVER_REV% == "R2" (goto WS2008_R2)
+	IF /I %SERVER_REV%==R2 (goto WS2008_R2)
 goto WS2008_Base
 
 :WS2008_X86-based
@@ -549,7 +549,7 @@ goto skel
 	dir %patchdir%\%1
 	echo Do you want me to remove it?
 	set /P CONFIRM=[y/N]  
-	if /I %CONFIRM% == "y" (del %patchdir%\%1) ELSE echo keeping the file
+	if /I %CONFIRM%==y (del %patchdir%\%1) ELSE echo keeping the file
 	set CONFIRM=""
 	goto EOF
 
@@ -575,8 +575,8 @@ goto skel
 
 :install_patch_newstyle
 	color 0f
-	echo Invoking: C:\Windows\System32\wusa.exe /quiet /norestart %patchdir%\%1 >> rapid_win.txt
-	start /wait C:\Windows\System32\wusa.exe /quiet /norestart %patchdir%\%1
+	echo Invoking: C:\Windows\System32\wusa.exe %patchdir%\%1 /quiet /norestart /log:%patchdir%\%1.patching.txt >> rapid_win.txt
+	start /wait C:\Windows\System32\wusa.exe %patchdir%\%1 /quiet /norestart /log:%patchdir%\%1.patching.txt
 	rem if %ERRORLEVEL%==0 set LAST_SUCCESS=1
 	call :success_patch %1
 	goto EOF
