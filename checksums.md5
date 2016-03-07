@@ -1,0 +1,10 @@
+245f45588328bbaad359f6510ac33223  rapidadpwd/rapidadpwd.ps1
+2bb8a3fdfc140d4627c77d2a84a67bf3  rapidlocalpwd/rapidlocalpwd.cmd
+6b854ffc12e5e2c32683a03714cf6c5d  rapidpatch/libeay32.dll
+e0dc8c6bbc787b972a9a468648dbfd85  rapidpatch/libiconv2.dll
+d202baa425176287017ffe1fb5d1b77c  rapidpatch/libintl3.dll
+37580b9354e984bf7c1a2b4ed7fa824b  rapidpatch/libssl32.dll
+9d56c857f420a0851d1df6921d200245  rapidpatch/rapidpatch.cmd
+aa173375c21ea31b8cc615dccb54e43b  rapidpatch/wget.exe
+eb574b236133e60c989c6f472f07827b  rapidsentry/md5sum.exe
+17b8be1e79e3c54152affd3027206665  rapidsentry/rapidsentry.cmd
